@@ -1,0 +1,350 @@
+* Here is my Emacs Configuration
+1. I was having my Configuration of emacs but in int.el file
+   but now i am importing it to config.org
+* Emacs Initialization
+#+begin_src emacs-lisp
+  (require 'package)
+  (setq package-archives nil)
+  (setq package-ebable-at-startup nil)
+  (package-initialize)
+
+#+end_src
+* Transparent Background disable some bars
+#+begin_src emacs-lisp
+  (set-frame-parameter nil 'alpha-backgroud 95)
+  (add-to-list 'default-frame-alist '(alpha-background . 95))
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (display-battery-mode t)
+  (display-time-mode t)
+#+end_src
+* Font Change using default-font-presets
+#+begin_src emacs-lisp
+
+    (use-package default-font-presets
+      :commands
+      (default-font-presets-forward
+       default-font-presets-backward
+       default-font-presets-choose
+       default-font-presets-scale-increase
+       default-font-presets-scale-decrease
+       default-font-presets-scale-fit
+       default-font-presets-scale-reset)
+      :config
+      (setq default-font-presets-list
+	    (list
+	     "Iosevka Nerd Font Mono:spacing=90"
+	     "NotoSans Nerd Font Propo"
+	     "FiraCode Nerd Font"
+	     "BlexMono Nerd Font"
+	     "JetBrainsMono Nerd Font"
+	     "VictorMono Nerd Font"
+	     "DejaVu Sans Mono"
+	     "RobotoMono Nerd Font Propo"
+	     "Victor Mono Nerd Font")))
+
+    (global-set-key (kbd "C-=") 'default-font-presets-scale-increase)
+    (global-set-key (kbd "C--") 'default-font-presets-scale-decrease)
+    (global-set-key (kbd "C-0") 'default-font-presets-scale-reset)
+
+    (global-set-key (kbd "<C-mouse-4>") 'default-font-presets-scale-increase)
+    (global-set-key (kbd "<C-mouse-5>") 'default-font-presets-scale-decrease)
+
+    (define-key global-map (kbd "<M-prior>") 'default-font-presets-forward)
+    (define-key global-map (kbd "<M-next>") 'default-font-presets-backward)
+#+end_src
+* Theme to load in emacs
+#+begin_src emacs-lisp
+
+  (use-package doom-themes
+    :ensure t
+    :config
+    (load-theme 'doom-nord t)
+    (doom-themes-visual-bell-config)
+    (doom-themes-org-config)
+    (doom-themes-neotree-config)
+    (doom-themes-treemacs-config))
+  (setq doom-themes-neotree-file-icons t)
+#+end_src
+** Here to configure a mode-line for emacs
+#+begin_src emacs-lisp
+
+  (require 'doom-modeline)
+  (doom-modeline-mode 1)
+  (setq doom-modeline-lsp t)
+  (setq doom-modeline-minor-modes t)
+  (setq doom-modeline-battery t)
+  (setq doom-modeline-env-version t)
+  (setq doom-modeline-time t)
+#+end_src
+* WHICH-KEY Setup
+#+begin_src emacs-lisp
+
+  (use-package which-key
+  :init
+  (which-key-mode 1)
+  :config
+  (setq which-key-side-window-location 'right
+	which-key-sort-order #'which-key-key-order-alpha
+	which-key-sort-uppercase-first nil
+	which-key-add-column-padding 1
+	which-key-max-display-columns nil
+	which-key-min-display-lines 6
+	which-key-side-window-slot -10
+	which-key-side-window-max-height 0.25
+	which-key-idle-delay 0.8
+	which-key-max-description-length 25
+	which-key-allow-imprecise-window-fit t
+	which-key-seperator "nf-md-hand_pointing_right"))
+
+#+end_src
+
+* Making EMACS an IDE by adding completion
+** Vertico for completion
+#+begin_src emacs-lisp
+  (use-package vertico
+	 :init
+	 (vertico-mode)
+	 (setq vertico-resize t)
+	 (setq vertico-cycle t))
+#+end_src
+** Corfu for advanced completion
+#+begin_src emacs-lisp
+
+    (use-package corfu
+	     :custom
+		  (corfu-auto t)
+		  (corfu-quit-no-match 'separator)
+		  (corfu-cycle t)
+		  (corfu-echo-documentation nil)
+		  (corfu-popupinfo-mode t)
+
+	      :bind (:map corfu-map
+			  ("<return>" . corfu-insert)
+			  ([tab] . corfu-next)
+			  ([backtab] . corfu-previous)
+			  ("C-h"      . corfu-info-documentation)
+			  ("TAB"      . corfu-next)
+			  ("S-TAB"    . corfu-previous))
+	      :init
+	      (global-corfu-mode))
+
+  (use-package emacs
+      :init
+      (setq completion-cycle-threshold 3)
+      (setq tab-always-indent 'complete))
+#+end_src
+** Orderless for orderless Completion
+#+begin_src emacs-lisp
+  (use-package orderless
+       :init
+       (setq completion-styles '(orderless basic)
+		completion-category-defaults nil
+		completion-category-overides '((file (styles partial-completion)))))
+	      #+end_src
+** Dabbrev with corfu
+#+begin_src emacs-lisp
+	  (use-package dabbrev
+	    :bind (("M-/" . dabbrev-completion)
+		   ("C-M-/" . dabbrev-expand))
+	    :custom
+	    (dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png)\\'")))
+#+end_src
+** Yasnippet for snippets in my IDE
+#+begin_src emacs-lisp
+  (require 'yasnippet)
+  (yas-reload-all)
+  (add-hook 'prog-mode-hook #'yas-minor-mode)
+#+end_src
+** Marginalia for showing document types in dired and more
+#+begin_src emacs-lisp
+  (use-package marginalia
+    :ensure t
+    :config
+    (marginalia-mode))
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)
+  (require 'nerd-icons-completion)
+  (nerd-icons-completion-mode)
+#+end_src
+** Setting up Embark
+#+begin_src emacs-lisp
+  (use-package embark
+	       :ensure t
+	       :bind
+	       (("C-.". embark-act)
+		("C-;". embark-dwim)
+		("C-h B" . embark-bindings))
+	       :init
+	       (setq prefix-help-command #'embark-prefix-help-command)
+	       (add-hook 'eldoc-documentataion-functions #'embark-eldoc-first-target)
+	       :config
+	       (add-to-list 'display-buffer-alist
+			    '("\\'\\*Embark Collect \\(Live\\|Completions\\)\\*"
+			      nil
+			      (window-parameters (mode-line-format . none))))
+	       (add-to-list 'marginalia-prompt-categories '("Help" . describe-function)))
+#+end_src
+** Using Package Embark Consult
+#+begin_src emacs-lisp
+  (use-package embark-consult
+	       :ensure t
+	       :hook
+	       (embark-collect-mode . embark-consult-preview-minor-mode))
+#+end_src
+** Using Package Eldoc-box
+#+begin_src emacs-lisp
+  ;;(require 'eldoc-box)
+  ;;(add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-at-point-mode t)
+#+end_src
+** Setting Up Programming modes for various languages
+*** Python Setup
+#+begin_src emacs-lisp
+  (use-package eglot
+    :config
+    (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))
+    (setq-default eglot-workspace-configuration
+		  '((:pylsp . (:configurationSources ["flake8"] :plugins ( :flake8 (:enabled t)))))))
+
+  (add-hook 'python-mode-hook 'eglot-ensure)
+  (add-hook 'python-mode-hook 'python-docstring-mode)
+  (add-hook 'python-mode-hook (lambda ()
+				(require 'sphinx-doc)
+				(sphinx-doc-mode t)))
+#+end_src
+*** C and C++ Languages Setup
+#+begin_src emacs-lisp
+  (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
+  (add-hook 'c-mode-hook 'eglot-ensure)
+  (add-hook 'c++-mode-hook 'eglot-ensure)
+#+end_src
+*** Prolog-mode setup for programming in prolog
+#+begin_src emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
+#+end_src
+*** Nix-mode for Nix configuration help
+#+begin_src emacs-lisp
+  (require 'nix-mode)
+  (add-to-list 'auto-mode-alist '("\\.nix\\'" . nix-mode))
+  (add-to-list 'eglot-server-programs '(nix-mode . ("rnix-lsp")))
+  (add-hook 'nix-mode-hook 'eglot-ensure)
+#+end_src
+*** Projectile mode setup for emacs
+#+begin_src emacs-lisp
+  (projectile-mode +1)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-ibuffer)
+
+#+end_src
+* Typing Practice setup
+#+begin_src emacs-lisp
+  (autoload 'typing-of-emacs "typing" "The Typing Of Emacs, a game." t)
+  (require 'monkeytype)
+  (require 'speed-type)
+#+end_src
+* Undo-tree and Clipmon Setup.
+#+begin_src emacs-lisp
+  (global-set-key (kbd "<M-f2>") 'clipmon-autoinsert-toggle)
+  (global-undo-tree-mode)
+#+end_src
+* Electric Pair mode setup
+#+begin_src emacs-lisp
+  (electric-pair-mode t)
+  (show-paren-mode t)
+  (electric-indent-mode nil)
+  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+#+end_src
+* Emacs org mode setup
+#+begin_src emacs-lisp
+  (modify-all-frames-parameters
+   '((right-divider-width . 10)
+     (internal-border-width . 10)))
+  (dolist (face '(window-divider
+		  window-divider-first-pixel
+		  window-divider-last-pixel))
+    (face-spec-reset-face face)
+    (set-face-foreground face (face-attribute 'default :background)))
+  (set-face-background 'fringe(face-attribute 'default :background))
+
+  (global-org-modern-mode)
+  (require 'org-tempo)
+  (setq org-startup-folded t)
+#+end_src
+** Org-Roam Setup inside emacs
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :custom
+    (org-roam-directory (file-truename "~/Desktop/Org-Raom-Knowledgebase"))
+    (org-roam-complete-everywhere t)
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+	   ("C-c n f" . org-roam-node-find)
+	   ("C-c n g" . org-roam-graph)
+	   ("C-c n i" . org-roam-node-insert)
+	   ("C-c n c" . org-roam-capture)
+	   ("C-c n j" . org-roam-dailies-capture-today)
+	   :map org-mode-map
+	   ("C-M-i"   . completion-at-point)))
+#+end_src
+
+** Org-roam capture templates
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :custom
+    (org-roam-capture-templates
+     '(("d" "default" plain
+	"%?"
+	:target (file+head "%<%Y%m%d%H%M%S>-${pr}.org" "#+title: ${title}\n")
+	:unnarrowed t)
+       ("l" "programming language" plain
+       "* Characteristics\n\n- Family: %?\n- Inspired by: \n\n* Reference:\n\n"
+       :target (file+head "%<%Y%m%d%H%M%S>-${pr}.org" "#+title: ${title}\n")
+       :unnarrowed t))))
+
+#+end_src
+* DashBoard at startup
+#+begin_src emacs-lisp
+  (require 'dashboard)
+  (dashboard-setup-startup-hook)
+#+end_src
+* Beacon emacs Setup
+#+begin_src emacs-lisp
+  (beacon-mode 1)
+#+end_src
+* Direnv setup in emacs
+#+begin_src emacs-lisp
+      (use-package direnv
+	:config
+	(direnv-mode))
+#+end_src
+* Windmove
+#+begin_src emacs-lisp
+  (when (fboundp 'windmove-default-keybindings)
+    (windmove-default-keybindings))
+#+end_src
+* org-babel-language setup
+#+begin_src emacs-lisp
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((ipython . t)
+     (prolog . t)))
+#+end_src
+* Emacs Tab Bar mode
+#+begin_src emacs-lisp
+  (tab-bar-mode t)
+#+end_src
+* email setup with gnus
+#+begin_src emacs-lisp
+#+end_src
+* Neo-Tree configuration
+#+begin_src emacs-lisp
+  (use-package all-the-icons
+    :ensure t)
+  (require 'neotree)
+  (global-set-key [f8] 'neotree-toggle)
+  (setq neo-theme (if (display-graphic-p) 'icons))
+#+end_src
+* lisp family setup
+#+begin_src emacs-lisp
+  (setq inferior-lisp-program "sbcl")
+  
+#+end_src
+
